@@ -1,0 +1,130 @@
+alabaster @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/alabaster/alabaster-0.7.12
+appdirs @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/appdirs/appdirs-1.4.4
+asn1crypto @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/asn1crypto/asn1crypto-1.4.0
+atomicwrites @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/atomicwrites/atomicwrites-1.4.0
+attrs @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/attrs/attrs-21.2.0
+Babel @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/Babel/Babel-2.9.1
+bcrypt @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/bcrypt/bcrypt-3.2.0
+bitstring @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/bitstring/bitstring-3.1.7
+blist @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/blist/blist-1.3.6
+CacheControl @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/CacheControl/CacheControl-0.12.6
+cachy @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/cachy/cachy-0.3.0
+certifi @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/certifi/certifi-2020.12.5
+cffi @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/cffi/cffi-1.14.5
+chardet @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/chardet/chardet-4.0.0
+cleo @ file:///export/soft/source/p/Python/extensions/cleo-0.8.1-py2.py3-none-any.whl
+click @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/click/click-7.1.2
+clikit @ file:///export/soft/source/p/Python/extensions/clikit-0.6.2-py2.py3-none-any.whl
+colorama @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/colorama/colorama-0.4.4
+crashtest @ file:///export/soft/source/p/Python/extensions/crashtest-0.3.1-py3-none-any.whl
+cryptography @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/cryptography/cryptography-3.4.7
+cycler==0.11.0
+Cython @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/Cython/Cython-0.29.23
+decorator @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/decorator/decorator-5.0.7
+dill==0.3.6
+distlib @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/distlib/distlib-0.3.1
+docopt @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/docopt/docopt-0.6.2
+docutils @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/docutils/docutils-0.17.1
+ecdsa @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/ecdsa/ecdsa-0.16.1
+et-xmlfile==1.1.0
+filelock @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/filelock/filelock-3.0.12
+flit @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/flit/flit-3.2.0
+flit-core @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/flitcore/flit_core-3.2.0
+fonttools==4.39.2
+fsspec @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/fsspec/fsspec-2021.4.0
+future @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/future/future-0.18.2
+html5lib @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/html5lib/html5lib-1.1
+idna @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/idna/idna-2.10
+imagesize @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/imagesize/imagesize-1.2.0
+importlib-metadata @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/importlib_metadata/importlib_metadata-4.0.1
+iniconfig @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/iniconfig/iniconfig-1.1.1
+intervaltree @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/intervaltree/intervaltree-3.1.0
+intreehooks @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/intreehooks/intreehooks-1.0
+ipaddress @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/ipaddress/ipaddress-1.0.23
+jeepney @ file:///export/soft/source/p/Python/extensions/jeepney-0.6.0-py3-none-any.whl
+Jinja2 @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/Jinja2/Jinja2-2.11.3
+joblib @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/joblib/joblib-1.0.1
+jsonschema @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/jsonschema/jsonschema-3.2.0
+keyring @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/keyring/keyring-21.8.0
+keyrings.alt @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/keyringsalt/keyrings.alt-4.0.2
+kiwisolver==1.4.4
+liac-arff @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/liacarff/liac-arff-2.5.0
+lockfile @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/lockfile/lockfile-0.12.2
+MarkupSafe @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/MarkupSafe/MarkupSafe-1.1.1
+matplotlib==3.5.3
+mock @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/mock/mock-4.0.3
+more-itertools @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/moreitertools/more-itertools-8.7.0
+msgpack @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/msgpack/msgpack-1.0.2
+netaddr @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/netaddr/netaddr-0.8.0
+netifaces @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/netifaces/netifaces-0.10.9
+networkx==3.0
+nose @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/nose/nose-1.3.7
+numpy==1.22.3
+openpyxl==3.1.2
+openturns==1.20.post3
+packaging @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/packaging/packaging-20.9
+pandas==1.5.1
+paramiko @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/paramiko/paramiko-2.7.2
+pastel @ file:///export/soft/source/p/Python/extensions/pastel-0.2.1-py2.py3-none-any.whl
+pathlib2 @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/pathlib2/pathlib2-2.3.5
+paycheck @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/paycheck/paycheck-1.0.2
+pbr @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/pbr/pbr-5.6.0
+pexpect @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/pexpect/pexpect-4.8.0
+Pillow==9.4.0
+pkginfo @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/pkginfo/pkginfo-1.7.0
+plotly==5.13.1
+pluggy @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/pluggy/pluggy-0.13.1
+poetry @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/poetry/poetry-1.1.6
+poetry-core @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/poetrycore/poetry-core-1.0.3
+psutil @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/psutil/psutil-5.8.0
+ptyprocess @ file:///export/soft/source/p/Python/extensions/ptyprocess-0.7.0-py2.py3-none-any.whl
+py @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/py/py-1.10.0
+py-expression-eval @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/py_expression_eval/py_expression_eval-0.3.13
+pyasn1 @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/pyasn1/pyasn1-0.4.8
+pycparser @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/pycparser/pycparser-2.20
+pycrypto @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/pycrypto/pycrypto-2.6.1
+Pygments @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/Pygments/Pygments-2.9.0
+pylev @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/pylev/pylev-1.3.0
+PyNaCl @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/PyNaCl/PyNaCl-1.4.0
+pyparsing @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/pyparsing/pyparsing-2.4.7
+pyrsistent @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/pyrsistent/pyrsistent-0.17.3
+pytest @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/pytest/pytest-6.2.4
+python-dateutil @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/pythondateutil/python-dateutil-2.8.1
+pytoml @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/pytoml/pytoml-0.1.21
+pytz @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/pytz/pytz-2021.1
+regex @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/regex/regex-2021.4.4
+requests @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/requests/requests-2.25.1
+requests-toolbelt @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/requeststoolbelt/requests-toolbelt-0.9.1
+scandir @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/scandir/scandir-1.10.0
+scipy==1.7.3
+SecretStorage @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/SecretStorage/SecretStorage-3.3.1
+semantic-version @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/semantic_version/semantic_version-2.8.5
+setuptools-rust @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/setuptoolsrust/setuptools-rust-0.12.1
+setuptools-scm @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/setuptools_scm/setuptools_scm-6.0.1
+shellingham @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/shellingham/shellingham-1.4.0
+simplegeneric @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/simplegeneric/simplegeneric-0.8.1
+simplejson @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/simplejson/simplejson-3.17.2
+six @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/six/six-1.16.0
+snowballstemmer @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/snowballstemmer/snowballstemmer-2.1.0
+sortedcontainers @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/sortedcontainers/sortedcontainers-2.3.0
+Sphinx @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/Sphinx/Sphinx-4.0.0
+sphinx-bootstrap-theme @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/sphinxbootstraptheme/sphinx-bootstrap-theme-0.7.1
+sphinxcontrib-applehelp @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/sphinxcontribapplehelp/sphinxcontrib-applehelp-1.0.2
+sphinxcontrib-devhelp @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/sphinxcontribdevhelp/sphinxcontrib-devhelp-1.0.2
+sphinxcontrib-htmlhelp @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/sphinxcontribhtmlhelp/sphinxcontrib-htmlhelp-1.0.3
+sphinxcontrib-jsmath @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/sphinxcontribjsmath/sphinxcontrib-jsmath-1.0.1
+sphinxcontrib-qthelp @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/sphinxcontribqthelp/sphinxcontrib-qthelp-1.0.3
+sphinxcontrib-serializinghtml @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/sphinxcontribserializinghtml/sphinxcontrib-serializinghtml-1.1.4
+sphinxcontrib-websupport @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/sphinxcontribwebsupport/sphinxcontrib-websupport-1.2.4
+tabulate @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/tabulate/tabulate-0.8.9
+tenacity==8.2.2
+threadpoolctl @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/threadpoolctl/threadpoolctl-2.1.0
+toml @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/toml/toml-0.10.2
+tomlkit @ file:///export/soft/source/p/Python/extensions/tomlkit-0.7.0-py2.py3-none-any.whl
+ujson @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/ujson/ujson-4.0.2
+urllib3 @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/urllib3/urllib3-1.26.4
+virtualenv @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/virtualenv/virtualenv-20.4.6
+wcwidth @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/wcwidth/wcwidth-0.2.5
+webencodings @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/webencodings/webencodings-0.5.1
+xlrd @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/xlrd/xlrd-2.0.1
+zipp @ file:///scratch/soft/Python/3.9.5/GCCcore-10.3.0/zipp/zipp-3.4.1
