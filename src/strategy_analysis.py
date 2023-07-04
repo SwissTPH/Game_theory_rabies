@@ -1,4 +1,6 @@
 # Imports
+import logging
+
 import pandas as pd
 import numpy as np
 import plotly.express as px
@@ -182,7 +184,7 @@ def simulation(df,
     strategy_experiment = strategy_experiment_generator(included_strategies)
 
 
-    tp_1,tp_wo_hce_1 = payoff_calculation(df,
+    tp_1,tp_wo_hce_1, _, _, _ = payoff_calculation(df,
                                           df_gdp,
                                           distance_matrix,
                                           strategy_experiment[0][0],
@@ -207,7 +209,7 @@ def simulation(df,
 
         df_inter = df[['country_code','probability_pep','vac_price_2024_mean','dog_population_mean','dog_population_increase_mean','pep_price_2024_mean']].copy()
 
-        tp_2, tp_wo_hce_2 = payoff_calculation(df,
+        tp_2, tp_wo_hce_2, _, _, _  = payoff_calculation(df,
                                                df_gdp,
                                                distance_matrix,
                                                strategy_experiment_element[0],
@@ -468,7 +470,7 @@ def payoff_calculation(df:pd.DataFrame,
         total_payoff_melted['cumulated_payoff'] = total_payoff_melted.groupby(by='country_code')["payoff"].cumsum()
         total_payoff_melted = pd.merge(total_payoff_melted, df_inter[['country_code', 'strategies']], on='country_code', how = 'left')
         total_payoff_melted.to_csv(
-        './results/payoff_melted_total_{}_{}_{}.csv'.format(datetime.now().strftime("%Y%m%d"),
+        '../results/payoff_melted_total_{}_{}_{}.csv'.format(datetime.now().strftime("%Y%m%d"),
                                                             datetime.now().strftime("%H%M%S"),
                                                             strategy_profile_name),
             encoding='UTF-8', sep=';', decimal=",")
@@ -486,13 +488,21 @@ def payoff_calculation(df:pd.DataFrame,
 
     df_inter.drop(columns = ["strategies", "min_dist_to_reservoir", "week_of_reintroduction"], inplace = True)
 
-    return total_payoff, payoff_without_hce
+    return total_payoff, payoff_without_hce, rabid_dog_population_sim_year, clinical_cases_humans_sim_year, exposed_humans_sim_year
 
 
 if __name__=='__main__':
+    logging.basicConfig(level=logging.INFO)
+
+    # Load data
+    print("============================================= Strategy analysis script =============================================")
+    print("Creating files with payoffs for some strategy profiles")
+
     df, neighbouring_countries, distance_matrix, df_gdp = read_all_data()
 
+    logging.info('Data loaded')
     # Payoffs for all_vac strategy profile
+    logging.info('Generating data for all_vac strategy profile')
     exp1 = 'ALL_VAC'
     payoff_calculation(df,
                        df_gdp,
@@ -504,6 +514,7 @@ if __name__=='__main__':
                        )
 
     # Payoffs for all_pep strategy profile
+    logging.info('Generating data for all_pep strategy profile')
     exp1 = 'ALL_PEP'
     payoff_calculation(df,
                        df_gdp,
@@ -515,6 +526,7 @@ if __name__=='__main__':
                        )
 
     # Payoffs for nash strategy profile
+    logging.info('Generating data for nash strategy profile')
     exp1 = 'NASH'
     payoff_calculation(df,
                        df_gdp,
@@ -534,12 +546,19 @@ if __name__=='__main__':
 
     total_payoff_samples = pd.DataFrame(columns=columns_names)
     payoff_without_hce_samples = pd.DataFrame(columns=columns_names)
+    # rabid_dog_population_samples = pd.DataFrame(columns=columns_names)
+    exposed_humans_samples = pd.DataFrame(columns=columns_names)
 
     # Payoffs for one_vac strategy profile for all countries
+    logging.info('Generating data for one_pep strategy profile')
+
     for i in range(48):
+        logging.debug("Simulation number: " + str(i))
+
         s_vec = np.ones(48)
         s_vec[i] = 0
-        total_payoff, payoff_without_hce = payoff_calculation(df,
+        total_payoff, payoff_without_hce, rabid_dog_population_sim_year, \
+        clinical_cases_humans_sim_year, exposed_humans_sim_year = payoff_calculation(df,
                                                               df_gdp,
                                                               distance_matrix,
                                                               s_vec,
@@ -550,25 +569,31 @@ if __name__=='__main__':
 
         total_payoff['sim_id'] = f'sim_{i}'
         payoff_without_hce['sim_id'] = f'sim_{i}'
+        exposed_humans_sim_year['sim_id'] = f'sim_{i}'
 
         total_payoff['year'] = range(2024, 2055)
         payoff_without_hce['year'] = range(2024, 2055)
+        exposed_humans_sim_year['year'] = range(2024, 2055)
 
         total_payoff_samples = pd.concat([total_payoff_samples, total_payoff], axis = 0)
         payoff_without_hce_samples = pd.concat([payoff_without_hce_samples, payoff_without_hce], axis = 0)
+        exposed_humans_samples = pd.concat([exposed_humans_samples, exposed_humans_sim_year], axis = 0)
 
-    total_payoff_samples.to_csv('./results/results_by_year/total_payoff_one_pep.csv', encoding='UTF-8', sep = ';', decimal =',')
-    payoff_without_hce_samples.to_csv('./results/results_by_year/payoff_without_hce_one_pep.csv', encoding='UTF-8', sep = ';', decimal =',')
-
+    total_payoff_samples.to_csv('../results/results_by_year/payoff_total_one_pep.csv', encoding='UTF-8', sep = ';', decimal ='.', index=True)
+    payoff_without_hce_samples.to_csv('../results/results_by_year/payoff_without_hce_one_pep.csv', encoding='UTF-8', sep = ';', decimal ='.', index=True)
+    exposed_humans_samples.to_csv('../results/results_by_year/exposed_humans_one_pep.csv', encoding='UTF-8', sep =';', decimal ='.', index=True)
 
     # Payoffs for NUMBER_VAC_24 strategy profile for a sample of 271 simulations
     total_payoff_samples = pd.DataFrame(columns=columns_names)
     payoff_without_hce_samples = pd.DataFrame(columns=columns_names)
+    exposed_humans_samples = pd.DataFrame(columns=columns_names)
 
+    logging.info('Generating data for n24 strategy profile')
     for i in range(271):
-        print(i)
 
-        total_payoff, payoff_without_hce = payoff_calculation(df,
+        logging.debug("Simulation number: " + str(i))
+        total_payoff, payoff_without_hce, rabid_dog_population_sim_year, \
+        clinical_cases_humans_sim_year, exposed_humans_sim_year = payoff_calculation(df,
                                                               df_gdp,
                                                               distance_matrix,
                                                               generate_strategy_vector('NUMBER_VAC', number_vac=24),
@@ -579,13 +604,16 @@ if __name__=='__main__':
 
         total_payoff['sim_id'] = f'sim_{i}'
         payoff_without_hce['sim_id'] = f'sim_{i}'
+        exposed_humans_sim_year['sim_id'] = f'sim_{i}'
 
         total_payoff['year'] = range(2024, 2055)
         payoff_without_hce['year'] = range(2024, 2055)
+        exposed_humans_sim_year['year'] = range(2024, 2055)
 
         total_payoff_samples = pd.concat([total_payoff_samples, total_payoff], axis=0)
         payoff_without_hce_samples = pd.concat([payoff_without_hce_samples, payoff_without_hce], axis=0)
+        exposed_humans_samples = pd.concat([exposed_humans_samples, exposed_humans_sim_year], axis=0)
 
-
-    total_payoff_samples.to_csv('../results/results_by_year/total_payoff_n24.csv', encoding='UTF-8', sep = ';', decimal =',')
-    payoff_without_hce_samples.to_csv('../results/results_by_year/payoff_without_hce_n24.csv', encoding='UTF-8', sep = ';', decimal =',')
+    total_payoff_samples.to_csv('../results/results_by_year/payoff_total_n24.csv', encoding='UTF-8', sep = ';', decimal ='.', index=True)
+    payoff_without_hce_samples.to_csv('../results/results_by_year/payoff_without_hce_n24.csv', encoding='UTF-8', sep = ';', decimal ='.', index=True)
+    exposed_humans_samples.to_csv('../results/results_by_year/exposed_humans_n24.csv', encoding='UTF-8', sep =';', decimal ='.', index=True)

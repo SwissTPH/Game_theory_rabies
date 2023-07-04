@@ -1,4 +1,5 @@
 # Imports
+import sys
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -13,6 +14,7 @@ from matplotlib.colors import BoundaryNorm
 import openturns as ot
 import os
 from shapely.geometry import Polygon
+import logging
 
 # Imports from utils.py
 from utils import  countries_names_dict, parameters_columns_names_list,parameters_columns_full_names_list, \
@@ -26,7 +28,8 @@ fmt = '${x:,.0f}'
 
 # Creation of results folders
 outdirs = ['../results', '../results/s_vaccination', '../results/s_reintroduction', '../img', '../img/inputs_dist',
-           '../img', '../results/all_vac', '../results/one_vac']
+           '../img', '../img/all_vac', '../img/one_vac', '../results/all_vac', '../results/one_vac']
+
 for outdir in outdirs:
     if not os.path.exists(outdir):
         os.mkdir(outdir)
@@ -44,6 +47,8 @@ def sobol_indices_compile_and_plot(folder:str = '../results/s_vaccination',
     :return:
     """
 
+    logging.info("Starting sobol_indices_compile_and_plot function")
+
     # Get the strategy name from the folder name
     experiment_strategy = experiment_strategy_from_folder(folder)
 
@@ -51,8 +56,10 @@ def sobol_indices_compile_and_plot(folder:str = '../results/s_vaccination',
     all_first_sobol_indices = pd.DataFrame(columns=parameters_columns_names_list)
     all_total_sobol_indices = pd.DataFrame(columns=parameters_columns_names_list)
 
+    logging.info("Starting loop over countries")
     # Loop over the countries to compile the data
     for country_code in countries_codes_list:
+        logging.debug(f"Starting loop for country {country_code}")
 
         df = pd.read_csv(f'{folder}/sensitivity_{country_code}_{experiment_strategy}.csv',
                          encoding='UTF-8',
@@ -64,13 +71,22 @@ def sobol_indices_compile_and_plot(folder:str = '../results/s_vaccination',
                              'Unnamed: 0' : 'variable'},
                   inplace = True)
 
-        all_first_sobol_indices = all_first_sobol_indices.append(pd.DataFrame(data = [np.concatenate(([country_code],df['first_order'].values))],
-                                                                              columns= parameters_columns_names_list),
-                                                                 ignore_index=True)
-        all_total_sobol_indices = all_total_sobol_indices.append(pd.DataFrame(data = [np.concatenate(([country_code],df['total_order'].values))],
-                                                                              columns= parameters_columns_names_list),
-                                                                 ignore_index=True)
+        all_first_sobol_indices = pd.concat([all_first_sobol_indices,
+                                             pd.DataFrame(
+                                                 data=[np.concatenate(([country_code], df['first_order'].values))],
+                                                 columns=parameters_columns_names_list)
+                                             ],
+                                            ignore_index = True)
 
+        all_total_sobol_indices = pd.concat([all_total_sobol_indices,
+                                             pd.DataFrame(
+                                                 data=[np.concatenate(([country_code], df['total_order'].values))],
+                                                 columns=parameters_columns_names_list)
+                                             ],
+                                            ignore_index = True)
+
+
+    logging.info("Loop over countries finished")
 
     # Transforming values into float
     all_first_sobol_indices[parameters_columns_names_list[1:]] = all_first_sobol_indices[parameters_columns_names_list[1:]].astype(float)
@@ -82,11 +98,13 @@ def sobol_indices_compile_and_plot(folder:str = '../results/s_vaccination',
 
     # Saving the resulting DataFrames
     if save :
-        all_first_sobol_indices.to_csv(f'first_order_sobol_{experiment_strategy}.csv', encoding ='UTF-8', sep = ';', decimal='.')
-        all_total_sobol_indices.to_csv(f'total_order_sobol_{experiment_strategy}.csv', encoding ='UTF-8', sep = ';', decimal='.')
+        logging.info("Saving the resulting DataFrames")
+        all_first_sobol_indices.to_csv(f'../results/first_order_sobol_{experiment_strategy}.csv', encoding ='UTF-8', sep = ';', decimal='.')
+        all_total_sobol_indices.to_csv(f'../results/total_order_sobol_{experiment_strategy}.csv', encoding ='UTF-8', sep = ';', decimal='.')
 
     # Ploting the Sobol indices
     if plot :
+        logging.info("Plotting the Sobol indices")
         fig, (ax1, ax2) = plt.subplots(1,2)
 
         fig.suptitle(f'Sobol indices for {experiment_strategy} strategy')
@@ -132,14 +150,14 @@ def sobol_indices_compile_and_plot(folder:str = '../results/s_vaccination',
                     facecolor='auto',
                     edgecolor='auto',
                     backend=None)
+    logging.info("Finished")
 
 def data_compile_save_and_plot(folder:str = '../results/s_vaccination',
                                 save_summary:bool = True,
                                 save_compiled_data:bool = True,
-                                plot_individual_results:bool = True,
-                                plot_payoffs_comparing:bool = True):
+                                plot_individual_results:bool = True):
     """
-    Compile data from payoffs calculations and summarize. Then, plot the data at individual level or all countries.
+    Compile data from payoffs calculations (files generated during the sensitivity analysis) and summarize. Then, plot the data at individual level or all countries.
 
     :param folder: Folder containing the data.
     :param save_summary: Save the summary of results.
@@ -148,6 +166,7 @@ def data_compile_save_and_plot(folder:str = '../results/s_vaccination',
     :param plot_payoffs_comparing: Plot all results.
     :return:
     """
+    logging.info("Starting data_compile_save_and_plot function")
 
     # Initializing resulting dataframes
     data = pd.DataFrame(columns=['country_code', 'benefice_from_baseline', 'cumulated_payoff', 'sim_id'])
@@ -156,8 +175,12 @@ def data_compile_save_and_plot(folder:str = '../results/s_vaccination',
     # Get the strategy profile name from folder name
     experiment_strategy = experiment_strategy_from_folder(folder)
 
+    logging.info(f"Strategy profile: {experiment_strategy}")
+    logging.info("Starting the loop over the countries for compiling the results")
+
     # Loop over the countries for compiling the results
     for country_code in countries_codes_list:
+        logging.info(f"Processing country code: {country_code}")
         df = pd.read_csv(f'{folder}/simulation_results_{country_code}_{experiment_strategy}.csv',
                          encoding='UTF-8',
                          sep = ';',
@@ -169,10 +192,10 @@ def data_compile_save_and_plot(folder:str = '../results/s_vaccination',
         nbr_negative_ben = np.sum(df['benefice_from_baseline']<0)
         nombre_sim = len(df['benefice_from_baseline'])
 
-        print('{} : Quantiles [2.5%, 97.5%] for gains/losses compared to baseline: [{}, {}]'.format(country_code, df['benefice_from_baseline'].quantile(0.025),
+        print('{} : Quantiles [2.5%, 97.5%] for gains/losses compared to baseline: [{:0f}, {:0f}]'.format(country_code, df['benefice_from_baseline'].quantile(0.025),
                                                                                                 df['benefice_from_baseline'].quantile(0.975)))
         # Summary
-        summary_data = summary_data.append(pd.DataFrame(data = [[
+        summary_data = pd.concat([summary_data, pd.DataFrame(data = [[
             f'{country_code}',
             df['benefice_from_baseline'].quantile(0.025),
             df['benefice_from_baseline'].quantile(0.5),
@@ -193,9 +216,8 @@ def data_compile_save_and_plot(folder:str = '../results/s_vaccination',
             nbr_negative_ben,
             nbr_negative_ben / nombre_sim
         ]],
-            columns = summary_columns),
-            ignore_index=False
-        )
+            columns = summary_columns)],
+                                 ignore_index=False)
 
         # Compiling data
         data = pd.concat([data, df[['country_code', 'benefice_from_baseline', 'cumulated_payoff', 'sim_id']]], axis = 0)
@@ -256,68 +278,78 @@ def data_compile_save_and_plot(folder:str = '../results/s_vaccination',
                         edgecolor='auto',
                         backend=None)
 
+    logging.info("Loop over countries finished")
+
     # Save summary data
     if save_summary :
+        logging.info("Saving summary data")
         summary_data.to_csv(f'../results/summary_data_{experiment_strategy}.csv', encoding ='UTF-8', sep = ';', decimal='.')
 
     # Save compiled data
     if save_compiled_data:
+        logging.info("Saving compiled data")
         data.to_csv(f'../results/compiled_data_{experiment_strategy}.csv', encoding ='UTF-8', sep = ';', decimal='.')
 
-    # Plot compared data
-    if plot_payoffs_comparing:
-        del data
+    logging.info("Finished")
 
-        summary_data.sort_values(by = 'gain_loss_to_baseline_mean', inplace = True)
+def plot_comparing_payoffs(experiment_strategy:str = 'one_vac'):
+    """
+    Plot the payoffs of the different strategies for all countries corresponding to the figures 3 (all_vac) and 4 (one_vac) in the appendix.
+    Needed data : summary_data_{experiment_strategy}.csv
+    :param experiment_strategy: the strategy to plot the payoffs for (Possible values
+    "one_vac", "all_vac")
+    :return: None
+    """
+    logging.info("Starting plotting of payoffs")
 
-        fig, axes = plt.subplots(2,1)
+    # Read data
+    logging.debug("Reading data : starting")
+    summary_data = pd.read_csv(f'../results/summary_data_{experiment_strategy}.csv', encoding ='UTF-8', sep = ';', decimal='.')
+    logging.debug("Reading data : finished")
 
-        x_pos = np.arange(0,48,1)
+    summary_data.sort_values(by = 'gain_loss_to_baseline_mean', inplace = True)
 
-        # y_err = np.stack([summary_data['gain_loss_to_baseline_0025'].values,
-        #                   summary_data['gain_loss_to_baseline_0975'].values],
-        #                  axis = 1)
-        #
-        # y_err_log = np.stack([summary_data['gain_loss_to_baseline_0025_log'].values,
-        #                   summary_data['gain_loss_to_baseline_0975_log'].values],
-        #                  axis = 1)
+    logging.debug("Starting plotting")
+    fig, axes = plt.subplots(2,1)
 
-        fig.suptitle(
+    x_pos = np.arange(0,48,1)
+
+    fig.suptitle(
             f"Countries {experiment_strategy} strategy relative gains/losses with 2.5% and 97.5% percentiles (linear and log scales)")
 
-        sns.barplot(data = summary_data,
+    sns.barplot(data = summary_data,
                     x = 'country_code',
                     y ='gain_loss_to_baseline_mean',
                     ax = axes[0],
                     palette = sns.color_palette("viridis", n_colors = 48, as_cmap=False))
         
-        axes[0].vlines(x_pos,
+    axes[0].vlines(x_pos,
                        summary_data['gain_loss_to_baseline_0025'].values,
                        summary_data['gain_loss_to_baseline_0975'].values,
                        colors = 'r',
                        linestyles = 'solid')
 
-        tick = mtick.StrMethodFormatter(fmt)
-        axes[0].yaxis.set_major_formatter(tick)
-        axes[0].set_xticks([])
-        axes[0].set(ylabel='Relative gains/losses (in $)', xlabel = None)
+    tick = mtick.StrMethodFormatter(fmt)
+    axes[0].yaxis.set_major_formatter(tick)
+    axes[0].set_xticks([])
+    axes[0].set(ylabel='Relative gains/losses (in $)', xlabel = None)
 
-        sns.barplot(data = summary_data,
+    sns.barplot(data = summary_data,
                     x = 'country_code',
                     y ='gain_loss_to_baseline_mean_log',
                     ax = axes[1],
                     palette =  sns.color_palette("viridis", n_colors = 48, as_cmap=False)
                     )
 
-        axes[1].vlines(x_pos,
+    axes[1].vlines(x_pos,
                        summary_data['gain_loss_to_baseline_0025_log'].values,
                        summary_data['gain_loss_to_baseline_0975_log'].values,
                        colors = 'r',
                        linestyles = 'solid')
-        axes[1].set(ylabel= 'Special log transformation of gains/losses (cf. methodology)', xlabel = 'Country ISO-3 code' )
-        plt.show()
+    axes[1].set(ylabel= 'Special log transformation of gains/losses (cf. methodology)', xlabel = 'Country ISO-3 code' )
+    plt.show()
 
-        fig.savefig(f'../img/{experiment_strategy}/countries_payoffs_{experiment_strategy}.png',
+    fig.savefig('../img/figure_{}_appendix.png'.format(3 if experiment_strategy=='all_vac' else 4),
                     dpi='figure',
                     format=None,
                     metadata=None,
@@ -327,14 +359,20 @@ def data_compile_save_and_plot(folder:str = '../results/s_vaccination',
                     edgecolor='auto',
                     backend=None)
 
+    logging.info("Finished")
+
 def plot_and_save_total_payoff():
     """
-    Plot the total payoffs distributions
+    Plot the total payoffs distributions.
+    Needed data : compiled_data_all_vac.csv
     :return:
     """
+    logging.info("Starting plotting of total payoffs")
 
     # Read the data
+    logging.debug("Reading data : starting")
     df = pd.read_csv('../results/compiled_data_all_vac.csv', encoding ='UTF-8', sep = ';', decimal='.')
+    logging.debug("Reading data : finished")
 
     # print(df.head(10))
     groupby_sim = df.groupby('sim_id')[['benefice_from_baseline', 'cumulated_payoff']].sum()
@@ -343,6 +381,8 @@ def plot_and_save_total_payoff():
     print('Mean value for the gains/losses compared to the baseline : ${:,.0f}'.format(groupby_sim['benefice_from_baseline'].mean()))
     print('Percentile interval [2.5%, 97.5%] for the gains/losses compared to the baseline: [${:,.0f}, ${:,.0f}]'.format(groupby_sim['benefice_from_baseline'].quantile(q = 0.025),
                                                                                                            groupby_sim['benefice_from_baseline'].quantile(q = 0.975)))
+
+    logging.debug("Starting plotting")
     fig, axes = plt.subplots(1, 2)
     fig.suptitle(
         f"Distributions of total payoffs and relative gains/losses")
@@ -398,24 +438,35 @@ def plot_and_save_total_payoff():
                 edgecolor='auto',
                 backend=None)
 
-def compile_and_save_dog_population_data():
+    logging.info("Finished")
+
+def compile_and_save_dog_population_data(folder_name:str='results'):
     """
     Compile the resulting data from the Monte Carlo simulations for rabid dog population, exposed humans and clinical cases.
+    Needed data from the sensitivity analysis: simulation_dog_population_results_{country}.csv
 
     :return:
     """
 
+    logging.info("Starting compiling data from Monte-Carlo simulations for rabid dog population, exposed humans and clinical cases")
 
     df = pd.DataFrame(columns = ['country_code', 'rabid_dogs_population', 'exposed_humans', 'clinical_cases', 'total_dog_population','sim_id'])
 
+    logging.info("Starting looping over countries")
     # Loop over the countries for compiling
     for country in countries_codes_list:
-        inter = pd.read_csv(f'../results/dog_pop/simulation_dog_population_results_{country}.csv', encoding = 'UTF-8', sep = ';', decimal = '.', index_col=0)
+        logging.debug(f"Processing for the country code: {country}")
+
+        inter = pd.read_csv(f'{folder_name}/dog_population/simulation_dog_population_results_{country}.csv', encoding = 'UTF-8', sep = ';', decimal = '.', index_col=0)
         inter['sim_id'] = range(200000)
         df = pd.concat([df, inter], axis = 0,ignore_index = True)
 
+    logging.info("Finished looping over countries")
+
     # Save the compiled data
+    logging.info("Saving compiled data")
     df.to_csv('../results/compiled_data_rabid_dog_population.csv', encoding='UTF-8', sep =';', decimal = '.')
+    logging.info("Saving compiled data : finished")
 
     # Print some information
     groupby = df.groupby('sim_id')[['rabid_dogs_population', 'exposed_humans', 'clinical_cases']].sum()
@@ -431,6 +482,7 @@ def compile_and_save_dog_population_data():
     print('Percentile interval [2.5%, 97.5%] for the number of clinical cases at the baseline: [{:,.0f}, {:,.0f}]'.format(groupby['clinical_cases'].quantile(q = 0.025),
                                                                                                            groupby['clinical_cases'].quantile(q = 0.975)))
 
+    logging.debug("Plotting the distributions")
     # Plot
     fig, axes = plt.subplots(1, 3)
     fig.suptitle(
@@ -469,11 +521,21 @@ def compile_and_save_dog_population_data():
                 edgecolor='auto',
                 backend=None)
 
+    logging.info("Finished")
+
+
 def coalition_analysis():
     """
     Coalition analysis with confidence interval. Payoffs comparison between different strategies possibilities.
+
+    Needed data :
+
+    - compiled_data_all_vac.csv
+    - compiled_data_one_vac.csv
     :return:
     """
+
+    logging.info("Starting coalition analysis")
 
     def coalition_group(row) :
         if row in coalition_pep:
@@ -482,6 +544,7 @@ def coalition_analysis():
             return 'C_VAC'
 
     # Read data
+    logging.debug("Reading data: 1/2")
     df = pd.read_csv('../results/compiled_data_all_vac.csv', encoding ='UTF-8', sep = ';', decimal='.')
 
     df['coalition'] = df['country_code'].apply(lambda row: coalition_group(row))
@@ -503,7 +566,9 @@ def coalition_analysis():
             groupby_coalition_sim.loc[groupby_coalition_sim['coalition']=='C_VAC','benefice_from_baseline'].quantile(q=0.975)))
 
     # Read data
+    logging.debug("Reading data: 2/2")
     df = pd.read_csv('../results/compiled_data_one_vac.csv', encoding ='UTF-8', sep = ';', decimal='.')
+    logging.debug("Reading data: finished")
 
     df['coalition'] = df['country_code'].apply(lambda row: coalition_group(row))
 
@@ -523,18 +588,28 @@ def coalition_analysis():
             groupby_coalition_sim.loc[groupby_coalition_sim['coalition']=='C_VAC','benefice_from_baseline'].quantile(q=0.025),
             groupby_coalition_sim.loc[groupby_coalition_sim['coalition']=='C_VAC','benefice_from_baseline'].quantile(q=0.975)))
 
+    logging.info("Finished")
+
 def visualize_gains():
     """
     Visualize gains on the map of Africa.
+
+    Needed data :
+
+    - Appendix 4 - Data for simulations.xlsx
+    - summary_data_all_vac.csv
     :return:
     """
+    logging.info("Starting visualization of gains")
 
     # Load shapefile of African countries
+    logging.debug("Reading data: shapefile")
     world = gpd.read_file(gpd.datasets.get_path('naturalearth_lowres'))
     africa = world.query('continent == "Africa"')
 
     # Load GDP data
-    gdp_data = pd.read_excel("../data/summary_data_for_simulation.xlsx",
+    logging.debug("Reading data: 1/2")
+    gdp_data = pd.read_excel("../data/Appendix 4 - Data for simulations.xlsx",
                                      sheet_name = "Pop_Data",
                                      header = 0)
 
@@ -542,7 +617,9 @@ def visualize_gains():
             0,1,1,0,1,1,1,1,1,1,1,1,1,0,1,1,1,1,0,1,1,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,1,0,1,1,1,1,0,1,1,1
         ])
 
+    logging.debug("Reading data: 2/2")
     gains_data = pd.read_csv('../results/summary_data_all_vac.csv', encoding='UTF-8', sep = ';', decimal= ',')
+    logging.debug("Reading data: finished")
 
 
     # Merge the data
@@ -582,10 +659,11 @@ def visualize_gains():
     africa_map.drop(columns=['country_code'], inplace = True)
     africa_map = pd.merge(africa_map, gdp_data[['country_code', 'gdp_2024', 'nash_strategy']], left_on='iso_a3', right_on = 'country_code')
     africa_map.drop(columns=['country_code'], inplace = True)
-    africa_map['gains_by_gdp'] = africa_map['gain_loss_to_baseline_mean']/africa_map['gdp_2024']
-    print(africa_map)
+    logging.debug(africa_map)
+    africa_map['gains_by_gdp'] = africa_map['gain_loss_to_baseline_mean'].astype(float)/africa_map['gdp_2024']
+    africa_map['gain_loss_to_baseline_mean'] = africa_map['gain_loss_to_baseline_mean'].astype(float)
     # Set up the plot
-
+    logging.info("Plotting map: 1/2")
     fig, ax = plt.subplots(figsize=(10, 8))
     # Add Labels
 
@@ -633,7 +711,17 @@ def visualize_gains():
 
     # Show the plot
     plt.show()
+    fig.savefig(f'../img/figure_3_manuscript.png',
+                dpi='figure',
+                format=None,
+                metadata=None,
+                bbox_inches=None,
+                pad_inches=0.1,
+                facecolor='auto',
+                edgecolor='auto',
+                backend=None)
 
+    logging.info("Plotting map: 2/2")
     fig, ax = plt.subplots(figsize=(10, 8))
 
     ax.set_title('Gains in % of the GDP from the cooperation for mass dog vaccination')
@@ -657,49 +745,75 @@ def visualize_gains():
                     edgecolor='k',
                     )
     plt.show()
+    fig.savefig(f'../img/figure_4_manuscript.png',
+                dpi='figure',
+                format=None,
+                metadata=None,
+                bbox_inches=None,
+                pad_inches=0.1,
+                facecolor='auto',
+                edgecolor='auto',
+                backend=None)
+
+    logging.info("Finished")
 
 def exposure_plot():
     """
     Plot the number of exposed humans over the years under different scenarios.
+
+    Needed data:
+
+    -   exposed_humans_{filename}.csv (filename in ['all_pep', 'all_vac', 'nash', 'n24', 'one_pep'])
+
     :return:
     """
 
-    files_names = ['ALL_PEP', 'ALL_VAC', 'NASH', 'number_24', 'one_pep']
+    logging.info("Starting exposure plot")
+
+    files_names = ['all_pep', 'all_vac', 'nash', 'n24', 'one_pep']
     res = pd.DataFrame(data = {"year" :  range(2024, 2055)})
 
+    logging.info("Starting loop for reading data")
     # Read data
     for file_name in files_names:
-        df = pd.read_csv(f"../results/results_by_year_exposed/exposed_humans_{file_name}.csv",
+
+        logging.debug("Reading data for " + file_name)
+        df = pd.read_csv(f"../results/results_by_year/exposed_humans_{file_name}.csv",
                          encoding = 'UTF-8',
                          sep = ';',
-                         decimal = ',' if file_name in ['number_24', 'one_pep'] else '.',
+                         decimal = '.',
                          index_col = 0)
 
         df[file_name.lower()] = np.sum(df[countries_codes_list], axis=1)
 
-        if file_name in ['number_24', 'one_pep']:
-
-            df = df.groupby('year', as_index=False)[file_name].mean()
+        if file_name in ['n24', 'one_pep']:
             print(df)
+            df = df.groupby(by = 'year', as_index=False)[file_name].mean()
+            # print(df)
 
         res = pd.concat([res, df[[file_name.lower()]]], axis = 1)
+
+    logging.info("Finished loop for reading data")
 
     initial_pop =  398529 / (1+0.012694042)
 
     res = pd.concat([
         pd.DataFrame(data =  [[2023, initial_pop, initial_pop, initial_pop, initial_pop, initial_pop]],
-                     columns = ['year', 'all_pep', 'all_vac', 'nash', 'number_24', 'one_pep']),
+                     columns = ['year', 'all_pep', 'all_vac', 'nash', 'n24', 'one_pep']),
         res
     ], axis=0, ignore_index=True)
 
-    print(res)
+    logging.debug(res)
+
+    # Plot
+    logging.info("Starting plot")
     fig, ax = plt.subplots(1,1)
     plt.title("Total Number of Humans Exposed to Rabid Dogs per Year for all 48 countries depending on the strategy profile")
     plt.plot(res['year'], res['all_vac'], color = 'g', linestyle = '-', marker = 'x', label = 'Vaccination campaign in all countries')
     plt.plot(res['year'], res['all_pep'], color = 'r', linestyle = '-', marker = 'x', label = 'Baseline (No vaccination)')
     plt.plot(res['year'], res['nash'], color = 'k', linestyle = '--', marker = 'x', label = 'Nash equilibrium (vaccination where it is a dominant strategy)')
     plt.plot(res['year'], res['one_pep'], color = 'c', linestyle = '--', marker = '.', label = 'Average for strategy profile with one defecting country')
-    plt.plot(res['year'], res['number_24'], color = 'b', linestyle = '--', marker = '.', label = 'Average for strategy profile with half vaccinated')
+    plt.plot(res['year'], res['n24'], color = 'b', linestyle = '--', marker = '.', label = 'Average for strategy profile with half vaccinated')
     plt.legend()
     plt.grid()
     plt.ylabel('Number of Humans Exposed')
@@ -709,14 +823,33 @@ def exposure_plot():
     ax.yaxis.set_major_formatter(tick)
     plt.show()
 
+    fig.savefig(f'../img/figure_1_manuscript.png',
+                dpi='figure',
+                format=None,
+                metadata=None,
+                bbox_inches=None,
+                pad_inches=0.1,
+                facecolor='auto',
+                edgecolor='auto',
+                backend=None)
+    logging.info("Finished")
+
 def break_even_calculation(hce = False):
     """
     Plot breakeven years with and without consideration for HCE.
+
+    Needed data (generated by the script strategy_analysis.py):
+
+    -   payoff_total_ALL_PEP.csv
+    -   payoff_total_ALL_VAC.csv
+    -   payoff_without_hce_ALL_PEP.csv
+    -   payoff_without_hce_ALL_VAC.csv
+
     :param hce: Include HCE or not.
     :return:
     """
 
-    # res = pd.DataFrame(data={"year": range(2024, 2055)})
+    logging.info("Starting break even calculation")
 
     if hce:
         file_name_prefix = 'payoff_total'
@@ -724,13 +857,15 @@ def break_even_calculation(hce = False):
         file_name_prefix = 'payoff_without_hce'
 
     # Read data
-    df_pep = pd.read_csv(f"../results/results_by_year/{file_name_prefix}_ALL_PEP.csv",
+    logging.debug("Reading data: 1/2")
+    df_pep = pd.read_csv(f"../results/results_by_year/{file_name_prefix}_all_pep.csv",
                          encoding='UTF-8',
                          sep=';',
                          decimal='.',
                          index_col=0)
 
-    df_vac = pd.read_csv(f"../results/results_by_year/{file_name_prefix}_ALL_VAC.csv",
+    logging.debug("Reading data: 2/2")
+    df_vac = pd.read_csv(f"../results/results_by_year/{file_name_prefix}_all_vac.csv",
                          encoding='UTF-8',
                          sep=';',
                          decimal='.',
@@ -754,6 +889,7 @@ def break_even_calculation(hce = False):
     res['year'] = range(2024, 2055)
 
     # Plot
+    logging.debug("Starting plot")
     fig, ax = plt.subplots()
 
     ax.set_title("Breakeven point per country")
@@ -778,28 +914,60 @@ def break_even_calculation(hce = False):
                ymax=np.full(31, 48) - 0.5, color="w", linewidths = 1)
 
     plt.show()
+    fig.savefig(f'../img/figure_2_{file_name_prefix}_manuscript.png',
+                dpi='figure',
+                format=None,
+                metadata=None,
+                bbox_inches=None,
+                pad_inches=0.1,
+                facecolor='auto',
+                edgecolor='auto',
+                backend=None)
+
+    logging.info("Finished")
 
 def cost_analysis_plot(hce = True):
     """
     Plot the cost analysis over the years.
+
+    Needed data (generated by the script strategy_analysis.py):
+    - payoff_total_ALL_PEP.csv
+    - payoff_total_ALL_VAC.csv
+    - payoff_without_hce_ALL_PEP.csv
+    - payoff_without_hce_ALL_VAC.csv
+    - payoff_total_NASH.csv
+    - payoff_without_hce_NASH.csv
+    - payoff_total_n24.csv
+    - payoff_without_hce_n24.csv
+    - payoff_total_one_pep.csv
+    - payoff_without_hce_one_pep.csv
+
     :param hce:
     :return:
     """
 
-    files_names = ['ALL_PEP', 'ALL_VAC', 'NASH', 'n24', 'one_pep']
+    logging.info("Starting cost analysis plot")
+
+    if hce:
+        file_name_prefix = 'payoff_total'
+    else:
+        file_name_prefix = 'payoff_without_hce'
+
+
+    files_names = ['all_pep', 'all_vac', 'nash', 'n24', 'one_pep']
     res = pd.DataFrame(data={"year": range(2024, 2055)})
+
+    logging.info("Starting looping over the files for reading data")
 
     # Read the data
     for file_name in files_names:
-        if hce:
-            file_name_prefix = 'payoff_total'
-        else :
-            file_name_prefix = 'payoff_without_hce'
+
+        logging.debug("Reading data: " + file_name)
 
         df = pd.read_csv(f"../results/results_by_year/{file_name_prefix}_{file_name}.csv",
                          encoding='UTF-8',
                          sep=';',
-                         decimal=',' if file_name in ['n24', 'one_pep'] else '.',
+                         decimal='.',
                          index_col=0)
 
         df[file_name.lower()] = np.sum(df[countries_codes_list], axis=1)
@@ -816,11 +984,14 @@ def cost_analysis_plot(hce = True):
         res
     ], axis=0, ignore_index=True)
 
+    logging.info("Finished looping over the files for reading data")
+
     # Calculate the cumulative payoffs
     res_cumsum = res.copy()
     res_cumsum[['all_pep', 'all_vac', 'nash', 'n24', 'one_pep']] = res[['all_pep', 'all_vac', 'nash', 'n24', 'one_pep']].cumsum()
 
     # Plot
+    logging.debug("Starting plot")
     fig, ax = plt.subplots(1,1)
     plt.title("Cost {} per Year for all 48 countries depending on the strategy profile".format('(with HCE)' if hce else '(without HCE)'))
     plt.plot(res_cumsum['year'], res_cumsum['all_vac'], color = 'g', linestyle = '-', marker = 'x', label = 'Vaccination campaign in all countries')
@@ -837,24 +1008,44 @@ def cost_analysis_plot(hce = True):
     ax.yaxis.set_major_formatter(tick)
     plt.show()
 
+    fig.savefig('../img/figure_{}_appendix.png'.format(6 if hce else 5),
+                dpi='figure',
+                format=None,
+                metadata=None,
+                bbox_inches=None,
+                pad_inches=0.1,
+                facecolor='auto',
+                edgecolor='auto',
+                backend=None)
 
-def estimate_confidence_interval_lives_lost(country_code):
+    logging.info("Finished")
+
+
+def estimate_confidence_interval_lives_lost(country_code, folder_name='results'):
     """
     Estimate the confidence interval for the number of lives lost due to rabies at the baseline.
+    The data for the dog population is generated by the script monte_carlo_baseline_populations.py.
+
+    Needed data:
+    - Appendix 4 - Data for simulations.xlsx
+    - simulation_dog_population_results_{country_code}.csv
+
     :param country_code: The country code of the country we want to estimate the confidence interval.
     :return:
     """
-
-    print("==================== Running Monte Carlo for the number of lives lost for {} ======================".format(country_code))
+    logging.info("Starting confidence interval estimation for the number of lives lost for {}".format(country_code))
+    # print("==================== Running Monte Carlo for the number of lives lost for {} ======================".format(country_code))
 
     # Read the data for the probability of receiving PEP
-    df = pd.read_excel("../data/summary_data_for_simulation.xlsx", #./Alvar/Dog Population Knobel 2005 including PopGrowth.xlsx
+    logging.debug("Reading data for the probability of receiving PEP: 1/2")
+    df = pd.read_excel("../data/Appendix 4 - Data for simulations.xlsx", #./Alvar/Dog Population Knobel 2005 including PopGrowth.xlsx
                        sheet_name="Pop_Data",
                        header=0)
     df = df[df['country_code']==country_code]
 
     # Read the data from Monte Carlo simulations
-    df_res = pd.read_csv(f'../results/dog_pop/simulation_dog_population_results_{country_code}.csv', encoding='UTF-8', sep = ';', decimal='.')
+    logging.debug("Reading data for the dog population: 2/2")
+    df_res = pd.read_csv(f'{folder_name}/dog_population/simulation_dog_population_results_{country_code}.csv', encoding='UTF-8', sep = ';', decimal='.')
 
     # Build the empirical distribution using Kernel Density Estimator
     sample = np.array(df_res['clinical_cases'].values)
@@ -890,59 +1081,179 @@ def estimate_confidence_interval_lives_lost(country_code):
     f_sample = f(sample_res)
 
     # Calculate the confidence intervals
-    inf = f_sample.computeQuantile(.025)
-    mean = f_sample.computeMean()
-    sup = f_sample.computeQuantile(.975)
-
-    print('Mean value for the gains/losses (ONE VAC) compared to the baseline for coalition C_PEP: ${:,.0f}'.format(mean))
+    inf = f_sample.computeQuantile(.025)[0]
+    mean = f_sample.computeMean()[0]
+    sup = f_sample.computeQuantile(.975)[0]
+    print('Mean value for the number of lives lost compared to the baseline: {:,.0f}'.format(mean))
     print(
-        'Percentile interval [2.5%, 97.5%] for the gains/losses compared to the baseline coalition C_PEP: '
-        '[${:,.0f}, ${:,.0f}]'.format(inf, sup))
+        'Percentile interval [2.5%, 97.5%] for the number of lives lost compared to the baseline: '
+        '[{:,.0f}, {:,.0f}]'.format(inf, sup))
 
     return [country_code, inf, mean, sup]
 
-    
+def compiling_data_lives_lost(folder_name:str='results'):
+    # Calculation and compiling of confidence intervals for lives lost
+
+    print("==================== Compiling data for the number of lives lost ======================")
+    res = []
+
+    logging.info("Starting compiling data for the number of lives lost")
+
+    logging.info("Starting loop over countries")
+    for country in countries_codes_list:
+        res.append(estimate_confidence_interval_lives_lost(country, folder_name=folder_name))
+
+    logging.info("Finished loop over countries")
+
+    res_df = pd.DataFrame(data=res,
+                 columns=['country_code', 'inf', 'mean', 'sup'])
+    res_df.to_csv(
+        '../results/res_lives_lost.csv',
+        encoding= 'UTF-8',
+        sep =';',
+        decimal = '.')
+
+    print('Mean value for the number of lives lost compared to the baseline: {:,.0f}'.format(res_df['mean'].sum()))
+    print(
+        'Percentile interval [2.5%, 97.5%] for the number of lives lost compared to the baseline: '
+        '[{:,.0f}, {:,.0f}]'.format(res_df['inf'].sum(), res_df['sup'].sum()))
+
+    logging.info("Finished")
+
+
+def launch_post_treatment_process(process_number:int,
+                                  folder_for_data_for_compiling:str="../results"):
+    """ Launch the post treatment process.
+    :param post_treatment_process_name: The name of the post treatment process to launch.
+
+    1. Compile and save the results of simulations from the sensitivity analysis,
+    as well as the individual plots for payoffs distributions
+
+    2. Compile and save the results of simulations from the sensitivity
+    analysis without individual plots
+
+    3. Compile Sobol indices results and plot
+    them (figures 1 and 2 in the appendix)
+
+    4. Compile and save the data of the number of lives
+    lost, as well as the total mean value and confidence interval
+
+    5. Compile, save and visualize data from Monte-Carlo simulations for
+    the dog population
+
+    6. Visualize the payoffs distributions for all countries for the all vaccination (figure 3 in the appendix)
+    and one vaccination (figure 4 in the appendix) strategies
+
+    7. Realize the coalition analysis from the compiled
+    data
+
+    8. Visualize the yearly exposure to rabid dogs for different strategy profiles
+    (figure 1 in the paper)
+
+    9. Calculate and plot the break-even point for the vaccination strategy with and without accounting for the
+    human capital effect (figure 2 in the paper)
+
+    10. Visualize the gains by country on the map
+    (figures 3 and 4 in the paper)
+
+    11. Calculate and plot the break-even point for different strategies with and without accounting for the
+    human capital effect (figures 5 and 6 in the appendix)
+
+    12. Plot and save total payoff distribution cumulative for all countries
+
+    :return:
+    """
+
+
+    if process_number == 1:
+        data_compile_save_and_plot(folder=f'{folder_for_data_for_compiling}/s_vaccination',
+                                   save_summary=True,
+                                   save_compiled_data=True,
+                                   plot_individual_results=True)
+
+        data_compile_save_and_plot(folder=f'{folder_for_data_for_compiling}/s_reintroduction',
+                                   save_summary=True,
+                                   save_compiled_data=True,
+                                   plot_individual_results=True)
+    elif process_number == 2:
+        data_compile_save_and_plot(folder=f'{folder_for_data_for_compiling}/s_vaccination',
+                                   save_summary=True,
+                                   save_compiled_data=True,
+                                   plot_individual_results=False)
+
+        data_compile_save_and_plot(folder=f'{folder_for_data_for_compiling}/s_reintroduction',
+                                   save_summary=True,
+                                   save_compiled_data=True,
+                                   plot_individual_results=False)
+
+    elif process_number == 3:
+        sobol_indices_compile_and_plot(folder=f'{folder_for_data_for_compiling}/s_vaccination')
+        sobol_indices_compile_and_plot(folder=f'{folder_for_data_for_compiling}/s_reintroduction')
+
+    elif process_number == 4:
+        compiling_data_lives_lost(folder_name=folder_for_data_for_compiling)
+
+    elif process_number == 5:
+        compile_and_save_dog_population_data(folder_name=folder_for_data_for_compiling)
+
+    elif process_number == 6:
+        plot_comparing_payoffs('all_vac')
+        plot_comparing_payoffs('one_vac')
+
+    elif process_number == 7:
+        coalition_analysis()
+
+    elif process_number == 8:
+        exposure_plot()
+
+    elif process_number == 9:
+        break_even_calculation(hce = False)
+        break_even_calculation(hce = True)
+
+    elif process_number == 10:
+        visualize_gains()
+
+    elif process_number == 11:
+        cost_analysis_plot(hce = False)
+        cost_analysis_plot(hce = True)
+
+    elif process_number == 12:
+        plot_and_save_total_payoff()
+
+    else:
+        raise ValueError("The process number must be between 1 and 12")
+
 
 if __name__=='__main__':
-    # compile_and_save_dog_population_data()
+    logging.basicConfig(level = logging.INFO)
 
-    # coalition_analysis()
+    print("==================================== Running the post treatment process ====================================")
+    print("The following processes are available:")
+    print("1. Compile and save the results of simulations from the sensitivity analysis, as well as the individual plots for payoffs distributions")
+    print("2. Compile and save the results of simulations from the sensitivity analysis without individual plots")
+    print("3. Compile Sobol indices results and plot them (figures 1 and 2 in the appendix)")
+    print("4. Compile and save the data of the number of lives lost, as well as the total mean value and confidence interval")
+    print("5. Compile, save and visualize data from Monte-Carlo simulations for the dog population")
+    print("6. Visualize the payoffs distributions for all countries for the all vaccination (figure 3 in the appendix) and one vaccination (figure 4 in the appendix) strategies")
+    print("7. Realize the coalition analysis from the compiled data")
+    print("8. Visualize the yearly exposure to rabid dogs for different strategy profiles (figure 1 in the paper)")
+    print("9. Calculate and plot the break-even point for the vaccination strategy with and without accounting for the human capital effect (figure 2 in the paper)")
+    print("10. Visualize the gains by country on the map (figures 3 and 4 in the paper)")
+    print("11. Calculate and plot the break-even point for different strategies with and without accounting for the human capital effect (figures 5 and 6 in the appendix)")
+    print("12. Plot and save total payoff distribution cumulative for all countries")
 
-    visualize_gains()
+    input_process_number = input("Please enter the number of the process you want to run: \n")
 
-    # exposure_plot()
-    #
-    # break_even_calculation(False)
-    # break_even_calculation(True)
-    #
-    # cost_analysis_plot(hce=False)
-    # cost_analysis_plot(hce=True)
-    #
-    # sobol_indices_compile_and_plot(folder = '../results/s_vaccination',save = False, plot = True)
-    # sobol_indices_compile_and_plot(folder = '../results/s_reintroduction',save = False, plot = True)
-    #
-    # data_compile_save_and_plot(folder='../results/s_vaccination',
-    #                            save_summary=False,
-    #                            save_compiled_data=False,
-    #                            plot_individual_results=False,
-    #                            plot_payoffs_comparing=False)
-    #
-    # data_compile_save_and_plot(folder='../results/s_reintroduction',
-    #                            save_summary=False,
-    #                            save_compiled_data=False,
-    #                            plot_individual_results=False,
-    #                            plot_payoffs_comparing=False)
-    #
-    #
-    # # Calculation and compiling of confidence intervals for lives lost
-    # res = []
-    #
-    # for country in countries_codes_list:
-    #     res.append(estimate_confidence_interval_lives_lost(country))
-    #
-    # pd.DataFrame(data=res,
-    #              columns=['country_code', 'inf', 'mean', 'sup']).to_csv(
-    #           'res_lives_lost.csv',
-    #           encoding= 'UTF-8',
-    #           sep =';',
-    #           decimal = '.')
+    try:
+        process_number = int(input_process_number)
+    except:
+        raise ValueError("The input must be an integer")
+
+    input_folder_name = '2'
+    if process_number in [1, 2, 3, 4, 5]:
+        input_folder_name = input("If the sensitivity data, you want to compile, is in folder 'results', please enter '1'\n"
+                              "If the data is in folder 'original_results', please enter '2':\n")
+
+    launch_post_treatment_process(process_number, '{}'.format('../results' if input_folder_name == '1' else '../original_results'))
+
+    print("==================================== End of the post treatment process ====================================")

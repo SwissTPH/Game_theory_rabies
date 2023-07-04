@@ -1,4 +1,6 @@
 # Imports
+import logging
+
 import pandas as pd
 import numpy as np
 from scipy.integrate import odeint
@@ -116,7 +118,7 @@ class monte_carlo_baseline_populations(ot.OpenTURNSPythonFunction) :
             X.append(Y[i])
 
         # # Verbose for following
-        # if self.num_sim%100==0: print(f'working: {self.num_sim}')
+        if self.num_sim%1000==0: logging.debug(f'working: {self.num_sim}')
 
         parameters = ['dog_population_mean',  # name of the dog population vector
                       'dog_population_increase_mean',  # name of the dog population increase vector
@@ -148,10 +150,9 @@ class monte_carlo_baseline_populations(ot.OpenTURNSPythonFunction) :
         df_res = [country_code, rabid_dogs, exposed_humans, clinical_cases]
 
         # Add the result to the resulting DataFrame
-        self.df_res = self.df_res.append(pd.DataFrame(data =[df_res],
-                                                      columns=['country_code', 'rabid_dogs_population', 'exposed_humans',
-                                                               'clinical_cases']),
-                                                      ignore_index = True)
+        self.df_res = pd.concat([self.df_res, pd.DataFrame(data =[df_res], columns=['country_code', 'rabid_dogs_population', 'exposed_humans',
+                                                               'clinical_cases'])],
+                                ignore_index=True)
 
         # Increase the simulation counter
         self.num_sim+=1
@@ -375,7 +376,7 @@ if __name__=='__main__':
     if len(sys.argv) > 1:
         size = int(sys.argv[1])
     else:
-        size = 1000
+        size = 200000
 
     if len(sys.argv) > 2:
         country_code =sys.argv[2]

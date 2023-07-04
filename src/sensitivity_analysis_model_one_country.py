@@ -128,7 +128,7 @@ class sensitivity_analysis_model_one_country(ot.OpenTURNSPythonFunction) :
             X.append(Y[i])
 
         # # Verbose for following
-        # if self.num_sim%1000==0: print(f'working: {self.num_sim}')
+        if self.num_sim%1000==0: print(f'working: {self.num_sim}')
 
         # Create the input data for computation
         df =self.df.copy()
@@ -153,11 +153,10 @@ class sensitivity_analysis_model_one_country(ot.OpenTURNSPythonFunction) :
                                                 save = False)
 
         # Add the result to the resulting DataFrame
-        self.df_res = self.df_res.append(pd.DataFrame(data =[df_res],
+        self.df_res = pd.concat([self.df_res, pd.DataFrame(data =[df_res],
                                                       columns=['country_code', 'benefice_from_baseline', 'probability_pep', 'vac_price_2024_mean',
                                   'dog_population_mean','dog_population_increase_mean','pep_price_2024_mean',
-                                  'strategies', 'type_strategy', 'benefited_from_vac', 'cumulated_payoff', 'sim_id']),
-                                                      ignore_index = True)
+                                  'strategies', 'type_strategy', 'benefited_from_vac', 'cumulated_payoff', 'sim_id'])], ignore_index=True)
 
         # Increase the simulation counter
         self.num_sim+=1
@@ -510,7 +509,8 @@ def run_sensitivity_analysis(country_code:str,
                              size:int,
                              reintroduction:bool = False,
                              min_dist_to_compare:int = 1,
-                             save_simulation_results:bool = True):
+                             save_simulation_results:bool = True,
+                             plot_input_distributions:bool = False) -> None:
     """
     Run the sensitivity analysis.
 
@@ -530,7 +530,7 @@ def run_sensitivity_analysis(country_code:str,
 
     # Creation of distribution
     distribution, all_dist_names = sensitivity_analysis_model_one_country_run.select_country_and_create_dist(
-        country_code, plot=False)
+        country_code, plot=plot_input_distributions)
 
     # Add the reintroduction if reintroduction is True
     if reintroduction:
@@ -572,12 +572,17 @@ def run_sensitivity_analysis(country_code:str,
     if save_simulation_results:
         sensitivity_analysis_model_one_country_run.save_resulting_dataframe()
 
+    print(data)
+    print(modele.getInputDescription())
+    print(type(modele.getInputDescription()))
+
 
     sensa_df = pd.DataFrame(data=data,
-                            index=modele.getInputDescription())
+                            index=list(modele.getInputDescription()))
+    print(sensa_df)
 
     # Saving results for Sobol Indices
-    sensa_df.to_csv('./results/{}/sensitivity_{}_{}.csv'.format('s_reintroduction' if reintroduction else 's_vaccination',
+    sensa_df.to_csv('../results/{}/sensitivity_{}_{}.csv'.format('s_reintroduction' if reintroduction else 's_vaccination',
                                                                  country_code,
                                                                  'one_vac' if reintroduction else 'all_vac'),
                     encoding='UTF-8', sep=';')
@@ -591,7 +596,7 @@ if __name__=='__main__':
     if len(sys.argv) > 1:
         size = int(sys.argv[1])
     else:
-        size = 50000
+        size = 10000
 
     if len(sys.argv) > 2:
         country_code =sys.argv[2]
@@ -619,7 +624,8 @@ if __name__=='__main__':
                              size,
                              reintroduction=reintroduction,
                              min_dist_to_compare=min_dist_to_compare,
-                             save_simulation_results=save_simulation_results)
+                             save_simulation_results=save_simulation_results,
+                             plot_input_distributions=False)
 
 
 
