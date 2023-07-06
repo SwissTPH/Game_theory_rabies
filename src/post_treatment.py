@@ -28,7 +28,7 @@ fmt = '${x:,.0f}'
 
 # Creation of results folders
 outdirs = ['../results', '../results/s_vaccination', '../results/s_reintroduction', '../img', '../img/inputs_dist',
-           '../img', '../img/all_vac', '../img/one_vac', '../results/all_vac', '../results/one_vac']
+           '../img', '../img/all_vac', '../img/one_vac']
 
 for outdir in outdirs:
     if not os.path.exists(outdir):
@@ -141,7 +141,7 @@ def sobol_indices_compile_and_plot(folder:str = '../results/s_vaccination',
         ax2.set_title("Total order Sobol' indices")
         plt.show()
 
-        fig.savefig(f'../img/{experiment_strategy}/sobol_indices_{experiment_strategy}.png',
+        fig.savefig(f'../img/sobol_indices_{experiment_strategy}.png',
                     dpi='figure',
                     format=None,
                     metadata=None,
@@ -292,7 +292,7 @@ def data_compile_save_and_plot(folder:str = '../results/s_vaccination',
 
     logging.info("Finished")
 
-def plot_comparing_payoffs(experiment_strategy:str = 'one_vac'):
+def plot_comparing_payoffs(experiment_strategy:str = 'one_vac', folder_name:str='../results'):
     """
     Plot the payoffs of the different strategies for all countries corresponding to the figures 3 (all_vac) and 4 (one_vac) in the appendix.
     Needed data : summary_data_{experiment_strategy}.csv
@@ -304,7 +304,7 @@ def plot_comparing_payoffs(experiment_strategy:str = 'one_vac'):
 
     # Read data
     logging.debug("Reading data : starting")
-    summary_data = pd.read_csv(f'../results/summary_data_{experiment_strategy}.csv', encoding ='UTF-8', sep = ';', decimal='.')
+    summary_data = pd.read_csv(f'{folder_name}/summary_data_{experiment_strategy}.csv', encoding ='UTF-8', sep = ';', decimal='.')
     logging.debug("Reading data : finished")
 
     summary_data.sort_values(by = 'gain_loss_to_baseline_mean', inplace = True)
@@ -361,7 +361,7 @@ def plot_comparing_payoffs(experiment_strategy:str = 'one_vac'):
 
     logging.info("Finished")
 
-def plot_and_save_total_payoff():
+def plot_and_save_total_payoff(folder_name:str='../results'):
     """
     Plot the total payoffs distributions.
     Needed data : compiled_data_all_vac.csv
@@ -371,7 +371,7 @@ def plot_and_save_total_payoff():
 
     # Read the data
     logging.debug("Reading data : starting")
-    df = pd.read_csv('../results/compiled_data_all_vac.csv', encoding ='UTF-8', sep = ';', decimal='.')
+    df = pd.read_csv(f'{folder_name}/compiled_data_all_vac.csv', encoding ='UTF-8', sep = ';', decimal='.')
     logging.debug("Reading data : finished")
 
     # print(df.head(10))
@@ -440,7 +440,7 @@ def plot_and_save_total_payoff():
 
     logging.info("Finished")
 
-def compile_and_save_dog_population_data(folder_name:str='results'):
+def compile_and_save_dog_population_data(folder_name:str='../results'):
     """
     Compile the resulting data from the Monte Carlo simulations for rabid dog population, exposed humans and clinical cases.
     Needed data from the sensitivity analysis: simulation_dog_population_results_{country}.csv
@@ -524,7 +524,7 @@ def compile_and_save_dog_population_data(folder_name:str='results'):
     logging.info("Finished")
 
 
-def coalition_analysis():
+def coalition_analysis(folder_name:str='../results'):
     """
     Coalition analysis with confidence interval. Payoffs comparison between different strategies possibilities.
 
@@ -545,7 +545,7 @@ def coalition_analysis():
 
     # Read data
     logging.debug("Reading data: 1/2")
-    df = pd.read_csv('../results/compiled_data_all_vac.csv', encoding ='UTF-8', sep = ';', decimal='.')
+    df = pd.read_csv(f'{folder_name}/compiled_data_all_vac.csv', encoding ='UTF-8', sep = ';', decimal='.')
 
     df['coalition'] = df['country_code'].apply(lambda row: coalition_group(row))
 
@@ -567,7 +567,7 @@ def coalition_analysis():
 
     # Read data
     logging.debug("Reading data: 2/2")
-    df = pd.read_csv('../results/compiled_data_one_vac.csv', encoding ='UTF-8', sep = ';', decimal='.')
+    df = pd.read_csv(f'{folder_name}/compiled_data_one_vac.csv', encoding ='UTF-8', sep = ';', decimal='.')
     logging.debug("Reading data: finished")
 
     df['coalition'] = df['country_code'].apply(lambda row: coalition_group(row))
@@ -590,7 +590,7 @@ def coalition_analysis():
 
     logging.info("Finished")
 
-def visualize_gains():
+def visualize_gains(folder_name:str='../results'):
     """
     Visualize gains on the map of Africa.
 
@@ -618,7 +618,7 @@ def visualize_gains():
         ])
 
     logging.debug("Reading data: 2/2")
-    gains_data = pd.read_csv('../results/summary_data_all_vac.csv', encoding='UTF-8', sep = ';', decimal= ',')
+    gains_data = pd.read_csv(f'{folder_name}/summary_data_all_vac.csv', encoding='UTF-8', sep = ';', decimal= ',')
     logging.debug("Reading data: finished")
 
 
@@ -711,7 +711,7 @@ def visualize_gains():
 
     # Show the plot
     plt.show()
-    fig.savefig(f'../img/figure_3_manuscript.png',
+    fig.savefig(f'../img/figure_2_manuscript.png',
                 dpi='figure',
                 format=None,
                 metadata=None,
@@ -745,7 +745,7 @@ def visualize_gains():
                     edgecolor='k',
                     )
     plt.show()
-    fig.savefig(f'../img/figure_4_manuscript.png',
+    fig.savefig(f'../img/figure_3_manuscript.png',
                 dpi='figure',
                 format=None,
                 metadata=None,
@@ -757,7 +757,7 @@ def visualize_gains():
 
     logging.info("Finished")
 
-def exposure_plot():
+def exposure_plot(folder_name = '../results'):
     """
     Plot the number of exposed humans over the years under different scenarios.
 
@@ -778,7 +778,7 @@ def exposure_plot():
     for file_name in files_names:
 
         logging.debug("Reading data for " + file_name)
-        df = pd.read_csv(f"../results/results_by_year/exposed_humans_{file_name}.csv",
+        df = pd.read_csv(f"{folder_name}/results_by_year/exposed_humans_{file_name}.csv",
                          encoding = 'UTF-8',
                          sep = ';',
                          decimal = '.',
@@ -834,7 +834,7 @@ def exposure_plot():
                 backend=None)
     logging.info("Finished")
 
-def break_even_calculation(hce = False):
+def break_even_calculation(hce = False, folder_name = '../results'):
     """
     Plot breakeven years with and without consideration for HCE.
 
@@ -858,14 +858,14 @@ def break_even_calculation(hce = False):
 
     # Read data
     logging.debug("Reading data: 1/2")
-    df_pep = pd.read_csv(f"../results/results_by_year/{file_name_prefix}_all_pep.csv",
+    df_pep = pd.read_csv(f"{folder_name}/results_by_year/{file_name_prefix}_all_pep.csv",
                          encoding='UTF-8',
                          sep=';',
                          decimal='.',
                          index_col=0)
 
     logging.debug("Reading data: 2/2")
-    df_vac = pd.read_csv(f"../results/results_by_year/{file_name_prefix}_all_vac.csv",
+    df_vac = pd.read_csv(f"{folder_name}/results_by_year/{file_name_prefix}_all_vac.csv",
                          encoding='UTF-8',
                          sep=';',
                          decimal='.',
@@ -914,7 +914,7 @@ def break_even_calculation(hce = False):
                ymax=np.full(31, 48) - 0.5, color="w", linewidths = 1)
 
     plt.show()
-    fig.savefig(f'../img/figure_2_{file_name_prefix}_manuscript.png',
+    fig.savefig(f'../img/figure_7_{file_name_prefix}_appendix.png',
                 dpi='figure',
                 format=None,
                 metadata=None,
@@ -926,7 +926,7 @@ def break_even_calculation(hce = False):
 
     logging.info("Finished")
 
-def cost_analysis_plot(hce = True):
+def cost_analysis_plot(hce = True, folder_name = '../results'):
     """
     Plot the cost analysis over the years.
 
@@ -964,7 +964,7 @@ def cost_analysis_plot(hce = True):
 
         logging.debug("Reading data: " + file_name)
 
-        df = pd.read_csv(f"../results/results_by_year/{file_name_prefix}_{file_name}.csv",
+        df = pd.read_csv(f"{folder_name}/results_by_year/{file_name_prefix}_{file_name}.csv",
                          encoding='UTF-8',
                          sep=';',
                          decimal='.',
@@ -1021,7 +1021,7 @@ def cost_analysis_plot(hce = True):
     logging.info("Finished")
 
 
-def estimate_confidence_interval_lives_lost(country_code, folder_name='results'):
+def estimate_confidence_interval_lives_lost(country_code, folder_name='../results'):
     """
     Estimate the confidence interval for the number of lives lost due to rabies at the baseline.
     The data for the dog population is generated by the script monte_carlo_baseline_populations.py.
@@ -1151,10 +1151,10 @@ def launch_post_treatment_process(process_number:int,
     (figure 1 in the paper)
 
     9. Calculate and plot the break-even point for the vaccination strategy with and without accounting for the
-    human capital effect (figure 2 in the paper)
+    human capital effect (figure 7 in the appendix)
 
     10. Visualize the gains by country on the map
-    (figures 3 and 4 in the paper)
+    (figures 2 and 3 in the paper)
 
     11. Calculate and plot the break-even point for different strategies with and without accounting for the
     human capital effect (figures 5 and 6 in the appendix)
@@ -1197,28 +1197,28 @@ def launch_post_treatment_process(process_number:int,
         compile_and_save_dog_population_data(folder_name=folder_for_data_for_compiling)
 
     elif process_number == 6:
-        plot_comparing_payoffs('all_vac')
-        plot_comparing_payoffs('one_vac')
+        plot_comparing_payoffs('all_vac', folder_name=folder_for_data_for_compiling)
+        plot_comparing_payoffs('one_vac', folder_name=folder_for_data_for_compiling)
 
     elif process_number == 7:
-        coalition_analysis()
+        coalition_analysis(folder_name=folder_for_data_for_compiling)
 
     elif process_number == 8:
-        exposure_plot()
+        exposure_plot(folder_name=folder_for_data_for_compiling)
 
     elif process_number == 9:
-        break_even_calculation(hce = False)
-        break_even_calculation(hce = True)
+        break_even_calculation(hce = False, folder_name=folder_for_data_for_compiling)
+        break_even_calculation(hce = True, folder_name=folder_for_data_for_compiling)
 
     elif process_number == 10:
-        visualize_gains()
+        visualize_gains(folder_name=folder_for_data_for_compiling)
 
     elif process_number == 11:
-        cost_analysis_plot(hce = False)
-        cost_analysis_plot(hce = True)
+        cost_analysis_plot(hce = False, folder_name=folder_for_data_for_compiling)
+        cost_analysis_plot(hce = True, folder_name=folder_for_data_for_compiling)
 
     elif process_number == 12:
-        plot_and_save_total_payoff()
+        plot_and_save_total_payoff(folder_name=folder_for_data_for_compiling)
 
     else:
         raise ValueError("The process number must be between 1 and 12")
@@ -1237,8 +1237,8 @@ if __name__=='__main__':
     print("6. Visualize the payoffs distributions for all countries for the all vaccination (figure 3 in the appendix) and one vaccination (figure 4 in the appendix) strategies")
     print("7. Realize the coalition analysis from the compiled data")
     print("8. Visualize the yearly exposure to rabid dogs for different strategy profiles (figure 1 in the paper)")
-    print("9. Calculate and plot the break-even point for the vaccination strategy with and without accounting for the human capital effect (figure 2 in the paper)")
-    print("10. Visualize the gains by country on the map (figures 3 and 4 in the paper)")
+    print("9. Calculate and plot the break-even point for the vaccination strategy with and without accounting for the human capital effect (figure 7 in the appendix)")
+    print("10. Visualize the gains by country on the map (figures 2 and 3 in the paper)")
     print("11. Calculate and plot the break-even point for different strategies with and without accounting for the human capital effect (figures 5 and 6 in the appendix)")
     print("12. Plot and save total payoff distribution cumulative for all countries")
 
@@ -1249,10 +1249,9 @@ if __name__=='__main__':
     except:
         raise ValueError("The input must be an integer")
 
-    input_folder_name = '2'
-    if process_number in [1, 2, 3, 4, 5]:
-        input_folder_name = input("If the sensitivity data, you want to compile, is in folder 'results', please enter '1'\n"
-                              "If the data is in folder 'original_results', please enter '2':\n")
+
+    input_folder_name = input("If the data you want to compile or to use is in folder 'results', please enter '1'\n"
+                              "If the data is in the folder 'original_results', please enter '2':\n")
 
     launch_post_treatment_process(process_number, '{}'.format('../results' if input_folder_name == '1' else '../original_results'))
 

@@ -1,3 +1,13 @@
+# Generated data
+results/
+original_results/
+img/
+original_img/
+
+# Manuscripts
+*.docx
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
