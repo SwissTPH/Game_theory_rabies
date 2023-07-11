@@ -84,11 +84,14 @@ Nakul Chitnis, Bassirou Bonfoh and Jakob Zinsstag.
 
  
 ## Installation and usage
+
+The scripts were tested on Windows 10, 11 and the Linux environment on sciCORE.
+
 ### I. Setting up the environment
 #### 1. For Windows users
 For Windows users, we recommend to install [Anaconda](https://www.anaconda.com/products/individual) to manage 
 the installation of the required packages. 
-1. Download and install Anaconda
+1. Download and install Anaconda (installation time: ~ 5 minutes)
 2. Open the Anaconda prompt and navigate to the folder where the repository is located
 3. Create a virtual environment named `game_theory_rabies` using the following command
 ```anaconda prompt
@@ -99,7 +102,8 @@ conda create -n game_theory_rabies python=3.8
 ```anaconda prompt
 conda activate game_theory_rabies
 ```
-5. Install the required packages
+5. Install the required packages (installation time: ~ 5 minutes)
+
 ```anaconda prompt
 pip install -r requirements.txt
 ```
@@ -143,7 +147,7 @@ pip install -r requirements.txt
 #### 1. Strategy analysis (`strategy_analysis.py`)
 
 This script runs the payoffs calculation using the mean values for different strategies 
-and saves the yearly results for some intermediary and final outputs.
+and saves the yearly results for some intermediary and final outputs. Running time:  ~ 5 minutes.
 
 ##### 1.1. Prerequisites
 Data dependencies:
@@ -195,7 +199,9 @@ INFO:root:Generating data for n24 strategy profile
 This script runs the Monte-Carlo simulations with sensitivity analysis for one country, as defined 
 in Appendix 1 in the section "Sensitivity analysis and consideration of uncertainty". This script saves (i) the 
 results of the simulations, i.e. all payoffs for the same model, but with different set of input parameters to 
-study the effects of uncertainty, and (ii) the Sobol indices for each stochastic input parameter.
+study the effects of uncertainty, and (ii) the Sobol indices for each stochastic input parameter. 
+
+The running time depends on the sample size. As a demo, a sample size of 1000 can be used and it takes around 10 minutes to run. For the original results, the sample size of 50000 was used, the approximate running time was 12-15 hours.
 
 ##### 2.1. Prerequisites
 Data dependencies:
@@ -262,6 +268,8 @@ defined in Appendix 1 in the section "Sensitivity analysis and consideration of 
 This script saves the results of the simulations, i.e. where each row contains the cumulative rabid dog population,
 the number of exposed humans and the number of clinical cases for one simulation.
 
+The running time depends on the sample size. As a demo, a sample size of 10000 can be used and it takes around 3 minutes to run. For the original results, the sample size of 200000 was used, the approximate running time was 1-2 hours.
+
 ##### 3.1. Prerequisites
 Data dependencies:
 - `Appendix 4 - Data for simulations.xlsx` (in the folder `data`)
@@ -305,7 +313,7 @@ Execution time: 150.17150235176086 seconds
 #### 4. Post-treatment of the results (`post_treatment.py`)
 
 This script contains several functions to post-treat (compile, save) the results of the Monte-Carlo simulations or 
-to plot the figures.
+to plot the figures. The running time depends on the process, the longest are the processes with compiling and saving the data, with a running time around 10 minutes.
 
 The following functionalities are available (information also available in the docstrings in the script) identified by the 
 same number that in the list below:
