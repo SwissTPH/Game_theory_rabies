@@ -1,5 +1,6 @@
 # Imports
 import sys
+import matplotlib
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -24,7 +25,7 @@ from utils import  countries_names_dict, parameters_columns_names_list,parameter
 pd.set_option("display.expand_frame_repr", False)
 warnings.simplefilter(action='ignore', category=FutureWarning)
 fmt = '${x:,.0f}'
-
+matplotlib.rcParams['font.sans-serif'] = 'Arial'
 
 # Creation of results folders
 outdirs = ['../results', '../results/s_vaccination', '../results/s_reintroduction', '../img', '../img/inputs_dist',
@@ -124,7 +125,7 @@ def sobol_indices_compile_and_plot(folder:str = '../results/s_vaccination',
         plt.setp(ax1.get_xticklabels(), rotation=45, ha="left", va ='bottom',
                  rotation_mode="anchor")
         plt.setp(ax1.get_yticklabels(), rotation=0)
-        ax1.set_title("First order Sobol' indices")
+        ax1.set_title("a) First order Sobol' indices")
 
         sns.heatmap(all_total_sobol_indices[parameters_columns_names_list[1:]],
                     xticklabels = parameters_columns_full_names_list,
@@ -138,12 +139,12 @@ def sobol_indices_compile_and_plot(folder:str = '../results/s_vaccination',
         ax2.xaxis.tick_top()
         plt.setp(ax2.get_xticklabels(), rotation=45, ha="left", va ='bottom',
                  rotation_mode="anchor")
-        ax2.set_title("Total order Sobol' indices")
+        ax2.set_title("b) Total order Sobol' indices")
         plt.show()
 
-        fig.savefig(f'../img/sobol_indices_{experiment_strategy}.png',
+        fig.savefig(f'../img/sobol_indices_{experiment_strategy}.pdf',
                     dpi='figure',
-                    format=None,
+                    format='pdf',
                     metadata=None,
                     bbox_inches=None,
                     pad_inches=0.1,
@@ -268,9 +269,9 @@ def data_compile_save_and_plot(folder:str = '../results/s_vaccination',
             axes[1].tick_params(axis='x', labelrotation = 25)
 
             plt.show()
-            fig.savefig(f'../img/{experiment_strategy}/payoff_distribution_{country_code}_{experiment_strategy}.png',
+            fig.savefig(f'../img/{experiment_strategy}/payoff_distribution_{country_code}_{experiment_strategy}.pdf',
                         dpi='figure',
-                        format=None,
+                        format='pdf',
                         metadata=None,
                         bbox_inches=None,
                         pad_inches=0.1,
@@ -317,47 +318,85 @@ def plot_comparing_payoffs(experiment_strategy:str = 'one_vac', folder_name:str=
     fig.suptitle(
             f"Countries {experiment_strategy} strategy relative gains/losses with 2.5% and 97.5% percentiles (linear and log scales)")
 
-    sns.barplot(data = summary_data,
+    colors_list = ['#006400', '#FF0000']
+    custom_palette = sns.color_palette(colors_list, 2)
+    summary_data['color'] = summary_data.apply(lambda x : 0 if x['gain_loss_to_baseline_mean'] > 0 else 1, axis = 1)
+    summary_data['color_2'] = summary_data.apply(lambda x : 0 if x['gain_loss_to_baseline_mean_log'] > 0 else 1, axis = 1)
+
+    sns.scatterplot(data = summary_data,
                     x = 'country_code',
                     y ='gain_loss_to_baseline_mean',
+                    marker = 'x',
+                    hue = 'color',
                     ax = axes[0],
-                    palette = sns.color_palette("viridis", n_colors = 48, as_cmap=False))
+                    palette = custom_palette,
+                    legend = False,
+                    linewidth = 2.5)
         
     axes[0].vlines(x_pos,
                        summary_data['gain_loss_to_baseline_0025'].values,
                        summary_data['gain_loss_to_baseline_0975'].values,
-                       colors = 'r',
-                       linestyles = 'solid')
+                       colors = 'k',
+                       linestyles = 'solid',
+                        linewidth = 1)
+
+    axes[0].scatter(x_pos, summary_data['gain_loss_to_baseline_0025'].values, color = 'k', marker = '_')
+    axes[0].scatter(x_pos, summary_data['gain_loss_to_baseline_0975'].values, color = 'k', marker = '_')
 
     tick = mtick.StrMethodFormatter(fmt)
     axes[0].yaxis.set_major_formatter(tick)
     axes[0].set_xticks([])
     axes[0].set(ylabel='Relative gains/losses (in $)', xlabel = None)
+    axes[0].set_title(label = 'a) Relative gains/losses on a linear scale.', loc = 'left')
+    axes[0].hlines(0, -1, 49, colors = 'k', linestyles = 'solid', linewidth = 0.5, alpha = 0.5)
+    axes[0].grid(visible = True, which = 'both', axis = 'y',
+                 color = 'k', linestyle = '--', linewidth = 0.5, alpha = 0.5)
 
-    sns.barplot(data = summary_data,
+    sns.scatterplot(data = summary_data,
                     x = 'country_code',
                     y ='gain_loss_to_baseline_mean_log',
                     ax = axes[1],
-                    palette =  sns.color_palette("viridis", n_colors = 48, as_cmap=False)
-                    )
+                    marker='x',
+                    hue='color_2',
+                    palette =  custom_palette,
+                    legend = False,
+                    linewidth = 2.5)
 
     axes[1].vlines(x_pos,
                        summary_data['gain_loss_to_baseline_0025_log'].values,
                        summary_data['gain_loss_to_baseline_0975_log'].values,
-                       colors = 'r',
-                       linestyles = 'solid')
+                       colors = 'k',
+                       linestyles = 'solid',
+                       linewidth = 1)
+    axes[1].hlines(0, -1, 49, colors = 'k', linestyles = 'solid', linewidth = 0.5, alpha = 0.5)
+    axes[1].scatter(x_pos, summary_data['gain_loss_to_baseline_0025_log'].values, color = 'k', marker = '_')
+    axes[1].scatter(x_pos, summary_data['gain_loss_to_baseline_0975_log'].values, color = 'k', marker = '_')
     axes[1].set(ylabel= 'Special log transformation of gains/losses (cf. methodology)', xlabel = 'Country ISO-3 code' )
+    axes[1].set_title(label = 'b) Relative gains/losses on a special logarithmic scale.', loc = 'left')
+    axes[1].grid(visible = True, which = 'major', axis = 'y',
+                 color = 'k', linestyle = '--', linewidth = 0.5, alpha = 0.5)
+
     plt.show()
 
-    fig.savefig('../img/figure_{}_appendix.png'.format(3 if experiment_strategy=='all_vac' else 4),
+    fig.savefig('../img/figure_{}_appendix.pdf'.format(3 if experiment_strategy=='all_vac' else 4),
                     dpi='figure',
-                    format=None,
+                    format='pdf',
                     metadata=None,
                     bbox_inches=None,
                     pad_inches=0.1,
                     facecolor='auto',
                     edgecolor='auto',
                     backend=None)
+
+    # fig.savefig('../img/figure_{}_appendix.png'.format(3 if experiment_strategy=='all_vac' else 4),
+    #                 dpi='figure',
+    #                 format=None,
+    #                 metadata=None,
+    #                 bbox_inches=None,
+    #                 pad_inches=0.1,
+    #                 facecolor='auto',
+    #                 edgecolor='auto',
+    #                 backend=None)
 
     logging.info("Finished")
 
@@ -428,9 +467,9 @@ def plot_and_save_total_payoff(folder_name:str='../results'):
     axes[1].tick_params(axis='x', labelrotation=25)
 
     plt.show()
-    fig.savefig(f'../img/payoff_distribution_all_vac_all_countries.png',
+    fig.savefig(f'../img/payoff_distribution_all_vac_all_countries.pdf',
                 dpi='figure',
-                format=None,
+                format='pdf',
                 metadata=None,
                 bbox_inches=None,
                 pad_inches=0.1,
@@ -511,9 +550,9 @@ def compile_and_save_dog_population_data(folder_name:str='../results'):
 
 
     plt.show()
-    fig.savefig(f'../img/rabid_dog_population_distribution_baseline.png',
+    fig.savefig(f'../img/rabid_dog_population_distribution_baseline.pdf',
                 dpi='figure',
-                format=None,
+                format='pdf',
                 metadata=None,
                 bbox_inches=None,
                 pad_inches=0.1,
@@ -711,9 +750,9 @@ def visualize_gains(folder_name:str='../results'):
 
     # Show the plot
     plt.show()
-    fig.savefig(f'../img/figure_2_manuscript.png',
+    fig.savefig(f'../img/figure_2_manuscript.pdf',
                 dpi='figure',
-                format=None,
+                format='pdf',
                 metadata=None,
                 bbox_inches=None,
                 pad_inches=0.1,
@@ -745,9 +784,9 @@ def visualize_gains(folder_name:str='../results'):
                     edgecolor='k',
                     )
     plt.show()
-    fig.savefig(f'../img/figure_3_manuscript.png',
+    fig.savefig(f'../img/figure_3_manuscript.pdf',
                 dpi='figure',
-                format=None,
+                format='pdf',
                 metadata=None,
                 bbox_inches=None,
                 pad_inches=0.1,
@@ -823,9 +862,9 @@ def exposure_plot(folder_name = '../results'):
     ax.yaxis.set_major_formatter(tick)
     plt.show()
 
-    fig.savefig(f'../img/figure_1_manuscript.png',
+    fig.savefig(f'../img/figure_1_manuscript.pdf',
                 dpi='figure',
-                format=None,
+                format='pdf',
                 metadata=None,
                 bbox_inches=None,
                 pad_inches=0.1,
@@ -853,9 +892,14 @@ def break_even_calculation(hce = False, folder_name = '../results'):
 
     if hce:
         file_name_prefix = 'payoff_total'
+        file_name_figure = 'figure_8_appendix'
+        title = 'Break-even point per country for the costs of the vaccination campaign and' \
+                ' PEP use (including the Human Capital Effect (HCE))'
     else :
         file_name_prefix = 'payoff_without_hce'
-
+        file_name_figure = 'figure_7_appendix'
+        title = 'Break-even point per country for the costs of the vaccination campaign and' \
+                ' PEP use (without the Human Capital Effect (HCE))'
     # Read data
     logging.debug("Reading data: 1/2")
     df_pep = pd.read_csv(f"{folder_name}/results_by_year/{file_name_prefix}_all_pep.csv",
@@ -892,7 +936,7 @@ def break_even_calculation(hce = False, folder_name = '../results'):
     logging.debug("Starting plot")
     fig, ax = plt.subplots()
 
-    ax.set_title("Breakeven point per country")
+    plt.suptitle(title)
     im = plt.imshow(res[countries_codes_list].T, cmap='RdYlGn')
 
     # Create colorbar
@@ -914,7 +958,7 @@ def break_even_calculation(hce = False, folder_name = '../results'):
                ymax=np.full(31, 48) - 0.5, color="w", linewidths = 1)
 
     plt.show()
-    fig.savefig(f'../img/figure_7_{file_name_prefix}_appendix.png',
+    fig.savefig(f'../img/{file_name_figure}.png',
                 dpi='figure',
                 format=None,
                 metadata=None,
@@ -924,7 +968,19 @@ def break_even_calculation(hce = False, folder_name = '../results'):
                 edgecolor='auto',
                 backend=None)
 
+    fig.savefig(f'../img/{file_name_figure}.pdf',
+                dpi='figure',
+                format='pdf',
+                metadata=None,
+                bbox_inches=None,
+                pad_inches=0.1,
+                facecolor='auto',
+                edgecolor='auto',
+                backend=None)
+
     logging.info("Finished")
+
+    return im
 
 def cost_analysis_plot(hce = True, folder_name = '../results'):
     """
@@ -1008,9 +1064,9 @@ def cost_analysis_plot(hce = True, folder_name = '../results'):
     ax.yaxis.set_major_formatter(tick)
     plt.show()
 
-    fig.savefig('../img/figure_{}_appendix.png'.format(6 if hce else 5),
+    fig.savefig('../img/figure_{}_appendix.pdf'.format(6 if hce else 5),
                 dpi='figure',
-                format=None,
+                format='pdf',
                 metadata=None,
                 bbox_inches=None,
                 pad_inches=0.1,
