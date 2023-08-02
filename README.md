@@ -1,7 +1,6 @@
 # Game_theory_rabies
 
-Code used for the simulations, data analysis and sensitivity analysis for the article "The potential coordination 
-benefits in disease control - evidence from rabies elimination efforts in Africa" (DOI: https://doi.org/10.21203/rs.3.rs-2961159/v1) by Alvar Bucher, Artemiy Dimov, Günther Fink,
+Code used for the simulations, data analysis and sensitivity analysis for the article "Benefit-cost analysis of coordinated strategies for control of rabies in Africa" (DOI: https://doi.org/10.21203/rs.3.rs-2961159/v1) by Alvar Bucher, Artemiy Dimov, Günther Fink,
 Nakul Chitnis, Bassirou Bonfoh and Jakob Zinsstag.
 
 ## List of folders and files
